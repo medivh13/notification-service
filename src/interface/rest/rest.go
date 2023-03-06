@@ -94,7 +94,7 @@ func makeRoute(
 	mh := mailHandler.NewMaildHandler(respClient, useCases.MailUseCase)
 
 	r.Route("/api", func(r chi.Router) {
-		r.Mount("/check", route.HealthRouter(hh))
+		r.Mount("/", route.HealthRouter(hh))
 		r.Mount("/mail", route.MailAppRouter(mh))
 
 	})
