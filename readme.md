@@ -12,6 +12,20 @@ I use existing libs :
 
 
 For setup :
-> git clone 
-> cd notification
-> go mod tidy
+- git clone 
+- cd notification
+- go mod tidy
+
+The Endpoint :
+```
+curl --location --request POST 'http://localhost:8080/api/mail' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "sender":"jane.doe@gmail.com",
+    "title":"no-reply",
+    "message":"it just simple message",
+    "recipients": [{
+        "email":"jhon.doe@gmail.com"
+    }]
+```
+}'
