@@ -1,0 +1,7 @@
+bin
+tmp
+.env
+launch.json
+logs
+.vscode
+.DS_Store
