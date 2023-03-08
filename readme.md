@@ -1,6 +1,6 @@
 # notification
 
-This is for learn using SMTP to send mail notif
+This is use for my little online class to teach how to use SMTP to send mail notif, and teach how to do an even drivien microservices as well
 
 
 I use existing libs :

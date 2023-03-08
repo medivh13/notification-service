@@ -20,11 +20,9 @@ type LogConf struct {
 	Name string
 }
 
-type SlackConf struct {
-	WebHookURL string
-	Icon       string
-	Emoji      string
-	Channel    string
+type NatsConf struct {
+	NatsHost   string
+	NatsStatus string
 }
 
 type SMTPConf struct {
@@ -34,12 +32,28 @@ type SMTPConf struct {
 	Port     int
 }
 
+type SqlDbConf struct {
+	Host                   string
+	Username               string
+	Password               string
+	Name                   string
+	Port                   string
+	SSLMode                string
+	Schema                 string
+	MaxOpenConn            int
+	MaxIdleConn            int
+	MaxIdleTimeConnSeconds int64
+	MaxLifeTimeConnSeconds int64
+}
+
 // Config ...
 type Config struct {
-	App  AppConf
-	Http HttpConf
-	Log  LogConf
-	SMTP SMTPConf
+	App   AppConf
+	Http  HttpConf
+	Log   LogConf
+	SMTP  SMTPConf
+	SqlDb SqlDbConf
+	Nats  NatsConf
 }
 
 // NewConfig ...
@@ -56,6 +70,21 @@ func Make() Config {
 
 	log := LogConf{
 		Name: os.Getenv("LOG_NAME"),
+	}
+
+	sqldb := SqlDbConf{
+		Host:     os.Getenv("DB_HOST"),
+		Username: os.Getenv("DB_USERNAME"),
+		Password: os.Getenv("DB_PASSWORD"),
+		Name:     os.Getenv("DB_NAME"),
+		Port:     os.Getenv("DB_PORT"),
+		SSLMode:  os.Getenv("DB_SSL_MODE"),
+		Schema:   os.Getenv("DB_SCHEMA"),
+	}
+
+	nats := NatsConf{
+		NatsHost:   os.Getenv("NATS_HOST"),
+		NatsStatus: os.Getenv("NATS_STATUS"),
 	}
 
 	// set default env to local
@@ -85,7 +114,9 @@ func Make() Config {
 		Http: http,
 		Log:  log,
 
-		SMTP: smtp,
+		SMTP:  smtp,
+		SqlDb: sqldb,
+		Nats:  nats,
 	}
 
 	return config
