@@ -7,9 +7,9 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/sirupsen/logrus"
 ) /*
- * Author      : Jody (jody.almaida@detik.com)
+ * Author      : Jody (github.com/medivh13)
  * Modifier    :
- * Domain      : notifikasi-center
+ * Domain      : notification
  */
 
 type Nats struct {
