@@ -16,6 +16,7 @@ import (
 	"notification/src/interface/rest/route"
 
 	mailHandler "notification/src/interface/rest/handlers/mail"
+	
 
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"

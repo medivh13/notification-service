@@ -2,65 +2,73 @@ package mailusecase
 
 import (
 	"bytes"
-	"html/template"
+	"encoding/json"
 	"log"
 	dto "notification/src/app/dtos/email"
+	natsPublisher "notification/src/infra/broker/nats/publisher"
 	notifConst "notification/src/infra/constant"
-	emailSrv "notification/src/infra/services/mail"
-
-	"github.com/alitto/pond"
+	mailService "notification/src/infra/services/mail"
+	"text/template"
 )
 
 var groupCount = 0
 
 type MailUsecaseInterface interface {
 	MailNotif(data *dto.EmailReqDTO) error
+	MailSent(data *dto.EmailReqDTO) error
 }
 
 type mailUseCase struct {
-	EmailServices    emailSrv.EmailServicesInt
-	Pondnotification *pond.WorkerPool
+	MailPublisher natsPublisher.PublisherInterface
+	EmailServices mailService.EmailServicesInt
 }
 
-func NewMailUseCase(emailServices emailSrv.EmailServicesInt, pondnotification *pond.WorkerPool) *mailUseCase {
+func NewMailUseCase(mailsServ mailService.EmailServicesInt, mailPublisher natsPublisher.PublisherInterface) *mailUseCase {
 	return &mailUseCase{
-		EmailServices:    emailServices,
-		Pondnotification: pondnotification,
+		MailPublisher: mailPublisher,
+		EmailServices: mailsServ,
 	}
 }
 
 func (uc *mailUseCase) MailNotif(data *dto.EmailReqDTO) error {
 
-	group := uc.Pondnotification.Group()
-	group.Submit(func() {
+	newData, _ := json.Marshal(data)
+	err := uc.MailPublisher.Nats(newData, notifConst.NOTIF_SENT)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
+}
 
-		var receiver []string
-		for _, val := range data.Recipients {
-			receiver = append(receiver, val.Email)
-		}
-		tmpl, err := template.New("webpage").Parse(notifConst.MailTemplate)
+func (uc *mailUseCase) MailSent(data *dto.EmailReqDTO) error {
 
-		if err != nil {
-			log.Println(err)
+	var receiver []string
+	for _, val := range data.Recipients {
+		receiver = append(receiver, val.Email)
+	}
+	tmpl, err := template.New("webpage").Parse(notifConst.MailTemplate)
 
-		}
-		buf := new(bytes.Buffer)
-		templateData := struct {
-			Message string
-		}{
-			Message: data.Message,
-		}
+	if err != nil {
+		log.Println(err)
 
-		err = tmpl.Execute(buf, templateData)
-		if err != nil {
-			log.Println(err)
+	}
+	buf := new(bytes.Buffer)
+	templateData := struct {
+		Message string
+	}{
+		Message: data.Message,
+	}
 
-		}
-		err = uc.EmailServices.SendEmail(data.Sender, data.Title, buf.String(), receiver)
-		if err != nil {
-			log.Println(err)
-		}
-	})
-	group.Wait()
+	err = tmpl.Execute(buf, templateData)
+	if err != nil {
+		log.Println(err)
+
+	}
+	err = uc.EmailServices.SendEmail(data.Sender, data.Title, buf.String(), receiver)
+	if err != nil {
+		log.Println(err)
+	}
+
 	return nil
 }

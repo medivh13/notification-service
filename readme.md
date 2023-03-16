@@ -29,3 +29,10 @@ curl --location --request POST 'http://localhost:8080/api/mail' \
     }]
 ```
 }'
+
+
+# update-1
+in this update, I'll show about simple message broker that is Nats.
+NATS is a simple, secure and high performance open source messaging system for cloud native applications, IoT messaging, and microservices architectures. The NATS server is written in the Go programming language, but client libraries to interact with the server are available for dozens of major programming languages. NATS supports both At Most Once and At Least Once delivery. It can run anywhere, from large servers and cloud instances, through edge gateways and even Internet of Things devices.
+
+For a simple Nats's installation you can install nats into your device Via Docker, then set the Nats host in .env file.

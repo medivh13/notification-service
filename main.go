@@ -15,7 +15,9 @@ import (
 
 	ms_log "notification/src/infra/log"
 
-	"github.com/alitto/pond"
+	"notification/src/infra/broker/nats"
+	natsPublisher "notification/src/infra/broker/nats/publisher"
+	mailNats "notification/src/infra/broker/nats/consumer/mail"
 	_ "github.com/joho/godotenv/autoload"
 )
 
@@ -44,20 +46,24 @@ func main() {
 	fmt.Printf("%+v", conf.SMTP)
 	emailIntegration := emailSrv.NewEmailService(conf.SMTP)
 
-	pool := pond.New(10, 1000)
-	defer pool.StopAndWait()
+	Nats := nats.NewNats(conf.Nats, logger)
+	publisher := natsPublisher.NewPushWorker(Nats)
 
 	// Create a task group
 	// HTTP Handler
 	// the server already implements a graceful shutdown.
 
+	allUC := usecases.AllUseCases{
+		MailUseCase: mailUc.NewMailUseCase(emailIntegration, publisher),
+	}
+
+	mailNats.NewNotifWorker(Nats, allUC.MailUseCase)
+
 	httpServer, err := rest.New(
 		conf.Http,
 		isProd,
 		logger,
-		usecases.AllUseCases{
-			MailUseCase: mailUc.NewMailUseCase(emailIntegration, pool),
-		},
+		allUC,
 	)
 	if err != nil {
 		panic(err)
